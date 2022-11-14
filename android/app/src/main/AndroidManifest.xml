@@ -3,6 +3,9 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.NFC" />
+    <!-- https://developer.android.com/guide/topics/connectivity/nfc/nfc#manifest  -->
+    <!-- The uses-feature element so that your application shows up in Google Play only for devices that have NFC hardware  -->
+    <uses-feature android:name="android.hardware.nfc" android:required="true" />
 
     <application
       android:name=".MainApplication"
