@@ -32,5 +32,15 @@ At `AndroidManifest.xml` these lines are responsible for NFC
    - Change Display name, for example `Tag counter game`
 3. In XCode add NFC capability
    3.1. At `Signing & Capabilities` press `+ Capability`, search for `Near Field Communication Tag Reading`
-   3.2 After that you should see the entitlement file `ios/TagCounterGame/TagCounterGame.entitlements`
+   3.2. After that you should see the entitlement file `ios/TagCounterGame/TagCounterGame.entitlements`
+   3.3. In `info.plist` add `Privacy - NFC Scan Usage Description`
+```xml
+<dict>
+<!--   ...  -->
+   <key>NFCReaderUsageDescription</key>
+   <string>Our app need to use NFC</string>
+<!--   ...  -->
+</dict>
+```
+
 4.
