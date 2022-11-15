@@ -1,5 +1,7 @@
 ## NFC
 
+Have a look on [this guide](https://github.com/revtel/react-native-nfc-manager/blob/main/setup.md), and read the instruction below
+
 ### Android
 
 At `AndroidManifest.xml` these lines are responsible for NFC
@@ -42,5 +44,3 @@ At `AndroidManifest.xml` these lines are responsible for NFC
 <!--   ...  -->
 </dict>
 ```
-
-4.
