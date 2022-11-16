@@ -1,66 +1,122 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
-
-import React, {useEffect} from 'react';
-import type {Node} from 'react';
+import React from 'react';
 import {
-  StyleSheet,
-  Text as TextRN,
-  useColorScheme,
-  View,
   TouchableOpacity,
+  View,
+  Text,
+  StyleSheet,
+  Platform,
+  SafeAreaView,
 } from 'react-native';
 import NfcManager, {NfcEvents} from 'react-native-nfc-manager';
+import AndroidPrompt from './AndroidPromptNFC';
 
-import {Colors} from 'react-native/Libraries/NewAppScreen';
+function Game(props) {
+  const [start, setStart] = React.useState(null);
+  const [duration, setDuration] = React.useState(0);
+  const androidPromptRef = React.useRef();
 
-const Text = ({children}) => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <TextRN style={{color: isDarkMode ? Colors.white : Colors.black}}>
-      {children}
-    </TextRN>
-  );
-};
-
-export const Game: () => Node = props => {
-  useEffect(() => {
+  React.useEffect(() => {
+    let count = 5;
     NfcManager.setEventListener(NfcEvents.DiscoverTag, tag => {
-      console.log('tag found', tag);
+      console.warn(JSON.stringify(tag));
+      count--;
+
+      if (Platform.OS === 'android') {
+        androidPromptRef.current.setHintText(`${count}...`);
+      } else {
+        NfcManager.setAlertMessageIOS(`${count}...`);
+      }
+
+      if (count <= 0) {
+        NfcManager.unregisterTagEvent().catch(() => 0);
+        setDuration(new Date().getTime() - start.getTime());
+
+        if (Platform.OS === 'android') {
+          androidPromptRef.current.setVisible(false);
+        }
+      }
     });
 
     return () => {
       NfcManager.setEventListener(NfcEvents.DiscoverTag, null);
     };
-  }, []);
-  const scanTag = async () => {
+  }, [start]);
+
+  async function scanTag() {
     await NfcManager.registerTagEvent();
-  };
+    if (Platform.OS === 'android') {
+      androidPromptRef.current.setVisible(true);
+    }
+    setStart(new Date());
+    setDuration(0);
+  }
 
   return (
     <View style={styles.wrapper}>
-      <TouchableOpacity onPress={scanTag} style={[styles.btn]}>
-        <Text>Scan a tag</Text>
+      <SafeAreaView />
+
+      <Text style={styles.label}>NFC Game</Text>
+
+      <View style={styles.content}>
+        {(duration > 0 && (
+          <Text style={styles.minLabel}>{duration} ms</Text>
+        )) || <Text style={styles.minLabel}>Let's go!</Text>}
+      </View>
+
+      <TouchableOpacity onPress={scanTag}>
+        <View style={styles.btn}>
+          <Text style={styles.playLabel}>PLAY!</Text>
+        </View>
       </TouchableOpacity>
+
+      <AndroidPrompt
+        ref={androidPromptRef}
+        onCancelPress={() => {
+          NfcManager.unregisterTagEvent().catch(() => 0);
+        }}
+      />
+
+      <SafeAreaView />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#1DA1F2',
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  label: {
+    fontSize: 40,
+    color: 'white',
+    marginBottom: 10,
+  },
+  minLabel: {
+    fontSize: 32,
+    color: '#ccc',
+    textAlign: 'center',
+  },
+  playLabel: {
+    fontSize: 28,
+    color: 'black',
+    textAlign: 'center',
   },
   btn: {
-    margin: 15,
-    padding: 15,
-    borderRadius: 8,
-    backgroundColor: '#ccc',
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 4,
+    borderColor: 'white',
+    backgroundColor: 'pink',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
+
+export default Game;
